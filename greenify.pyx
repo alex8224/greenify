@@ -1,5 +1,7 @@
-from gevent.hub import get_hub, getcurrent, Waiter
-from gevent.timeout import Timeout
+#from gevent.hub import get_hub, getcurrent, Waiter
+#from gevent.timeout import Timeout
+from greenlet import getcurrent
+from gtornado.green import Waiter, Watcher
 
 cdef extern from "libgreenify.h":
     struct greenify_watcher:
@@ -29,37 +31,23 @@ cdef extern from "hook_greenify.h":
 
     void* greenify_patch_lib(const char* library_filename, greenified_function_t fn)
 
-cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_ms) with gil:
+cdef int wait_gtornado_event(greenify_watcher* watchers, int nwatchers, int timeout_in_ms) with gil:
     cdef int fd, event
     cdef float timeout_in_s
     cdef int i
-
-    hub = get_hub()
     watchers_list = []
     for i in range(nwatchers):
         fd = watchers[i].fd;
         event = watchers[i].events;
-        watcher = hub.loop.io(fd, event)
+        watcher = Watcher(fd, event)
         watchers_list.append(watcher)
-
-    if timeout_in_ms != 0:
-        timeout_in_s = timeout_in_ms / 1000.0
-        t = Timeout.start_new(timeout_in_s)
-        try:
-            wait(watchers_list)
-            return 0
-        except Timeout:
-            return -1
-        finally:
-            t.cancel()
-    else:
-        wait(watchers_list)
+        wait_notify(watchers_list)
         return 0
 
 def greenify():
-    greenify_set_wait_callback(wait_gevent)
+    greenify_set_wait_callback(wait_gtornado_event)
 
-def wait(watchers):
+def wait_notify(watchers):
     waiter = Waiter()
     switch = waiter.switch
     unique = object()
