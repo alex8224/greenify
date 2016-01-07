@@ -1,10 +1,10 @@
 import sys
 from glob import glob
 from setuptools import setup, Extension
+
+version = '0.2.2'
+
 # setuptools DWIM monkey-patch madness: http://dou.bz/37m3XL
-
-version = '0.2'
-
 if 'setuptools.extension' in sys.modules:
     m = sys.modules['setuptools.extension']
     m.Extension.__dict__ = m._Extension.__dict__
@@ -19,7 +19,7 @@ libraries = ["dl"]
 
 setup(
     name="greenify",
-    version='0.2',
+    version=version,
     description = "Make C module compatible with gevent at runtime.",
     long_description=readme(),
     platforms=['Linux'],
@@ -36,6 +36,7 @@ setup(
     url="https://github.com/douban/greenify",
     download_url = 'https://github.com/douban/greenify/archive/%s.tar.gz' % version,
     setup_requires=['setuptools_cython', 'Cython >= 0.18'],
+    install_requires=['gevent'],
     ext_modules=[
         Extension('greenify', sources, include_dirs=include_dirs,
                   libraries=libraries)
