@@ -36,7 +36,8 @@ setup(
     url="https://github.com/douban/greenify",
     download_url = 'https://github.com/douban/greenify/archive/%s.tar.gz' % version,
     setup_requires=['setuptools_cython', 'Cython >= 0.18'],
-    install_requires=['gevent'],
+    install_requires=['gTornado>=0.1'],
+    dependency_links=['https://github.com/alex8224/gTornado/releases/download/0.1/gTornado-0.1.linux-x86_64.tar.gz'],
     ext_modules=[
         Extension('greenify', sources, include_dirs=include_dirs,
                   libraries=libraries)
